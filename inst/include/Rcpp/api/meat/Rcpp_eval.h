@@ -58,7 +58,7 @@ inline SEXP Rcpp_eval(SEXP expr, SEXP env) {
             
             Shield<SEXP> conditionMessageCall(::Rf_lang2(::Rf_install("conditionMessage"), res));
             
-            Shield<SEXP> conditionMessage(::Rf_eval(conditionMessageCall, R_GlobalEnv));
+            Shield<SEXP> conditionMessage(Rcpp_fast_eval(conditionMessageCall, R_GlobalEnv));
             throw eval_error(CHAR(STRING_ELT(conditionMessage, 0)));
         }
         
