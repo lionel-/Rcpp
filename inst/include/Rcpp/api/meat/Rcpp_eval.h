@@ -22,6 +22,16 @@
 
 namespace Rcpp {
 
+inline SEXP Rcpp_fast_eval(SEXP expr, SEXP env) {
+    int error = 0;
+    SEXP res = ::R_tryEvalForward(expr, env, &error);
+
+    if (error)
+        throw internal::LongjumpException();
+    else
+        return res;
+}
+
 inline SEXP Rcpp_eval(SEXP expr, SEXP env) {
 
     // 'identity' function used to capture errors, interrupts
@@ -39,8 +49,7 @@ inline SEXP Rcpp_eval(SEXP expr, SEXP env) {
     SET_TAG(CDDR(call), ::Rf_install("error"));
     SET_TAG(CDDR(CDR(call)), ::Rf_install("interrupt"));
 
-    // execute the call
-    Shield<SEXP> res(::Rf_eval(call, R_GlobalEnv));
+    Shield<SEXP> res(Rcpp_fast_eval(call, R_GlobalEnv));
 
     // check for condition results (errors, interrupts)
     if (Rf_inherits(res, "condition")) {

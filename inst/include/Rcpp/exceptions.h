@@ -108,6 +108,10 @@ namespace Rcpp {
         throw Rcpp::exception(message.c_str());
     }                                                        // #nocov end
 
+    namespace internal {
+        struct LongjumpException { };
+    }
+
 } // namespace Rcpp
 
 

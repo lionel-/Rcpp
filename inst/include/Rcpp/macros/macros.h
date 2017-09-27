@@ -41,6 +41,9 @@
     catch( Rcpp::internal::InterruptedException &__ex__) {                                       \
         rcpp_output_type = 1 ;                                                                   \
     }                                                                                            \
+    catch( Rcpp::internal::LongjumpException &__ex__) {                                          \
+        rcpp_output_type = 3 ;                                                                   \
+    }                                                                                            \
     catch(Rcpp::exception& __ex__) {                                                             \
        rcpp_output_type = 2 ;                                                                    \
        rcpp_output_condition = PROTECT(rcpp_exception_to_r_condition(__ex__)) ;                  \
