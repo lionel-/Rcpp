@@ -132,7 +132,7 @@ extern "C" void R_init_Rcpp(DllInfo* dllinfo) {
 
     R_useDynamicSymbols(dllinfo, FALSE);	// set up symbol symbol lookup (cf R 3.4.0)
 
-    init_Rcpp_cache();          		// init the cache
+    R_WithForwardTargetExec(&init_Rcpp_cache_wrapper, NULL);  // init the cache
 
     init_Rcpp_routines(dllinfo);		// init routines
 }

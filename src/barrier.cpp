@@ -135,6 +135,11 @@ SEXP set_current_error(SEXP cache, SEXP e) {
     return R_NilValue;
 }
 
+// For R_WithForwardTargetExec()
+void init_Rcpp_cache_wrapper(void*) {
+    init_Rcpp_cache();
+}
+
 SEXP init_Rcpp_cache() {
     SEXP getNamespaceSym = Rf_install("getNamespace"); // cannot be gc()'ed  once in symbol table
     Rcpp::Shield<SEXP> RcppString(Rf_mkString("Rcpp"));
