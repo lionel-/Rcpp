@@ -25,7 +25,7 @@
 
 test.binary.testRcppPackage <- function() {
 
-    if (.runThisTest && .onLinux && .onTravis) {
+    if (FALSE && .runThisTest && .onLinux && .onTravis) {
 
         debpkg <- "r-cran-testrcpppackage"
         rpkg <- "testRcppPackage"
