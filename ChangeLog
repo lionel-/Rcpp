@@ -1,3 +1,13 @@
+2018-06-19  Lionel Henry  <lionel@rstudio.com>
+
+        * inst/include/RcppCommon.h: Remove default environment argument
+        for `Rcpp_fast_eval()`. It used to be the global environment as
+        default but it is better to think explicitly about where an
+        expression should be evaluated. Typical locations are package
+        namespaces, the base environment or the global environment. The
+        latter is rarely appropriate because only namespaces provide
+        encapsulation guarantees.
+
 2018-06-15  Dirk Eddelbuettel  <edd@debian.org>
 
         * DESCRIPTION (Version, Date): Roll minor version
