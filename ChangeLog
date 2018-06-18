@@ -8,6 +8,16 @@
         latter is rarely appropriate because only namespaces provide
         encapsulation guarantees.
 
+        * inst/include/Rcpp/DataFrame.h: Specify environment argument
+        in `Rcpp_fast_eval()` calls.
+        * inst/include/Rcpp/Environment.h: idem
+        * inst/include/Rcpp/Function.h: idem
+        * inst/include/Rcpp/generated/Function__operator.h: idem
+        * inst/include/Rcpp/proxy/NamesProxy.h: idem
+        * inst/include/Rcpp/r_cast.h: idem
+        * inst/include/RcppCommon.h: idem
+        * inst/unitTests/cpp/misc.cpp: idem
+
 2018-06-15  Dirk Eddelbuettel  <edd@debian.org>
 
         * DESCRIPTION (Version, Date): Roll minor version
