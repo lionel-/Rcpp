@@ -95,7 +95,7 @@ SEXP get_rcpp_cache() {
         SEXP getNamespaceSym = Rf_install("getNamespace"); // cannot be gc()'ed  once in symbol table
         Rcpp::Shield<SEXP> RcppString(Rf_mkString("Rcpp"));
         Rcpp::Shield<SEXP> call(Rf_lang2(getNamespaceSym, RcppString));
-        Rcpp::Shield<SEXP> RCPP(Rf_eval(call, R_GlobalEnv));
+        Rcpp::Shield<SEXP> RCPP(Rf_eval(call, R_BaseEnv));
 
         Rcpp_cache = Rf_findVarInFrame(RCPP, Rf_install(".rcpp_cache"));
         Rcpp_cache_know = true;
@@ -137,7 +137,7 @@ SEXP init_Rcpp_cache() {
     SEXP getNamespaceSym = Rf_install("getNamespace"); // cannot be gc()'ed  once in symbol table
     Rcpp::Shield<SEXP> RcppString(Rf_mkString("Rcpp"));
     Rcpp::Shield<SEXP> call(Rf_lang2(getNamespaceSym, RcppString));
-    Rcpp::Shield<SEXP> RCPP(Rf_eval(call, R_GlobalEnv));
+    Rcpp::Shield<SEXP> RCPP(Rf_eval(call, R_BaseEnv));
     Rcpp::Shield<SEXP> cache(Rf_allocVector(VECSXP, RCPP_CACHE_SIZE));
 
     // the Rcpp namespace
@@ -206,4 +206,3 @@ int* get_cache(int m) {
     std::fill(res, res+m, 0);
     return res;
 }
-

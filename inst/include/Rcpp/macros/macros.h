@@ -63,7 +63,7 @@
     if( rcpp_output_type == 2 ){                                                                 \
        SEXP stop_sym  = Rf_install( "stop" ) ;                                                   \
        SEXP expr = PROTECT( Rf_lang2( stop_sym , rcpp_output_condition ) ) ;                     \
-       Rf_eval( expr, R_GlobalEnv ) ;                                                            \
+       Rf_eval(expr, R_BaseEnv);                                                                 \
     }                                                                                            \
     if (rcpp_output_type == 3) {                                                                 \
         Rcpp::internal::resumeJump(rcpp_output_condition);                                       \

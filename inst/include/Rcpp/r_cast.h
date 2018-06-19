@@ -31,7 +31,7 @@ namespace Rcpp {
             Armor<SEXP> res;
             try{
                 SEXP funSym = Rf_install(fun);
-                res = Rcpp_fast_eval(Rf_lang2(funSym, x), R_GlobalEnv);
+                res = Rcpp_fast_eval(Rf_lang2(funSym, x), R_BaseEnv);
             } catch( eval_error& e) {
                 const char* fmt = "Could not convert using R function: %s.";
                 throw not_compatible(fmt, fun);
@@ -114,7 +114,7 @@ namespace Rcpp {
                     // return Rf_coerceVector( x, STRSXP );
                     // coerceVector does not work for some reason
                     Shield<SEXP> call( Rf_lang2( Rf_install( "as.character" ), x ) );
-                    Shield<SEXP> res( Rcpp_fast_eval( call, R_GlobalEnv ) );
+                    Shield<SEXP> res(Rcpp_fast_eval(call, R_BaseEnv));
                     return res;
                 }
             case CHARSXP:

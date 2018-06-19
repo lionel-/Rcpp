@@ -233,7 +233,7 @@ namespace internal {
 
     // We want the call just prior to the call from Rcpp_eval
     // This conditional matches
-    // tryCatch(evalq(sys.calls(), .GlobalEnv), error = identity, interrupt = identity)
+    // tryCatch(evalq(sys.calls(), .BaseEnv), error = identity, interrupt = identity)
     inline bool is_Rcpp_eval_call(SEXP expr) {
         SEXP sys_calls_symbol = Rf_install("sys.calls");
         SEXP identity_symbol = Rf_install("identity");
@@ -246,7 +246,7 @@ namespace internal {
             nth(expr, 0) == tryCatch_symbol &&
             CAR(nth(expr, 1)) == evalq_symbol &&
             CAR(nth(nth(expr, 1), 1)) == sys_calls_symbol &&
-            nth(nth(expr, 1), 2) == R_GlobalEnv &&
+            nth(nth(expr, 1), 2) == R_BaseEnv &&
             nth(expr, 2) == identity_fun &&
             nth(expr, 3) == identity_fun;
     }
@@ -258,7 +258,7 @@ inline SEXP get_last_call(){
     SEXP sys_calls_symbol = Rf_install("sys.calls");
 
     Rcpp::Shield<SEXP> sys_calls_expr(Rf_lang1(sys_calls_symbol));
-    Rcpp::Shield<SEXP> calls(Rcpp_fast_eval(sys_calls_expr, R_GlobalEnv));
+    Rcpp::Shield<SEXP> calls(Rcpp_fast_eval(sys_calls_expr, R_BaseEnv));
 
     SEXP cur, prev;
     prev = cur = calls;
@@ -350,7 +350,7 @@ inline SEXP string_to_try_error( const std::string& str){
         Rcpp::Shield<SEXP> simpleErrorExpr( Rf_lang2(::Rf_install("simpleError"), tryError ));
    #endif
 
-    Rcpp::Shield<SEXP> simpleError( Rf_eval(simpleErrorExpr, R_GlobalEnv) );
+    Rcpp::Shield<SEXP> simpleError(Rf_eval(simpleErrorExpr, R_BaseEnv));
     Rf_setAttrib( tryError, R_ClassSymbol, Rf_mkString("try-error") ) ;
     Rf_setAttrib( tryError, Rf_install( "condition") , simpleError ) ;
 
@@ -368,14 +368,14 @@ inline void forward_exception_to_r(const std::exception& ex){
     SEXP stop_sym  = Rf_install( "stop" ) ;
     Rcpp::Shield<SEXP> condition( exception_to_r_condition(ex) );
     Rcpp::Shield<SEXP> expr( Rf_lang2( stop_sym , condition ) ) ;
-    Rf_eval( expr, R_GlobalEnv ) ;
+    Rf_eval(expr, R_BaseEnv) ;
 }
 
 inline void forward_rcpp_exception_to_r(const Rcpp::exception& ex) {
     SEXP stop_sym  = Rf_install( "stop" ) ;
     Rcpp::Shield<SEXP> condition( exception_to_r_condition(ex) );
     Rcpp::Shield<SEXP> expr( Rf_lang2( stop_sym , condition ) ) ;
-    Rf_eval( expr, R_GlobalEnv ) ;
+    Rf_eval(expr, R_BaseEnv);
 }
 
 

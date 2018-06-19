@@ -18,6 +18,15 @@
         * inst/include/RcppCommon.h: idem
         * inst/unitTests/cpp/misc.cpp: idem
 
+        * inst/include/Rcpp/DataFrame.h: Evaluate in the base environment
+        rather than the global environment for robustness against symbol
+        masking in the search path.
+        * inst/include/Rcpp/Environment.h: idem
+        * inst/include/Rcpp/exceptions.h: idem
+        * inst/include/Rcpp/macros/macros.h: idem
+        * inst/include/Rcpp/r_cast.h: idem
+        * src/barrier.cpp: idem
+
 2018-06-15  Dirk Eddelbuettel  <edd@debian.org>
 
         * DESCRIPTION (Version, Date): Roll minor version
