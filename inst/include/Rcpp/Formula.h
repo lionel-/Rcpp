@@ -54,7 +54,7 @@ namespace Rcpp{
                     if( ::Rf_inherits( y, "formula" ) ){
                         Storage::set__( y ) ;
                     } else{
-                        SEXP z = internal::convert_using_rfunction( y, "as.formula") ;
+                        SEXP z = internal::convert_using_rfunction(y, "as.formula", "stats") ;
                         Storage::set__( z ) ;
                     }
                 } else{
@@ -62,12 +62,12 @@ namespace Rcpp{
                 }
                 break;
             default:
-                Storage::set__( internal::convert_using_rfunction( x, "as.formula") ) ;
+                Storage::set__(internal::convert_using_rfunction(x, "as.formula", "stats"));
             }
         }
 
         explicit Formula_Impl( const std::string& code ) {
-            Storage::set__( internal::convert_using_rfunction( ::Rf_mkString(code.c_str()), "as.formula") ) ;
+            Storage::set__(internal::convert_using_rfunction(::Rf_mkString(code.c_str()), "as.formula", "stats"));
         }
 
         void update(SEXP){}

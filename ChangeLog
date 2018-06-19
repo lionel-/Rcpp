@@ -27,6 +27,11 @@
         * inst/include/Rcpp/r_cast.h: idem
         * src/barrier.cpp: idem
 
+        * inst/include/Rcpp/r_cast.h: Add `ns` argument to
+        `convert_using_rfunction()`.
+        * inst/include/Rcpp/Formula.h: Evaluate `as.formula()` in the
+        stats:: namespace using the new `ns` argument.
+
 2018-06-15  Dirk Eddelbuettel  <edd@debian.org>
 
         * DESCRIPTION (Version, Date): Roll minor version

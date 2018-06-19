@@ -27,11 +27,20 @@
 namespace Rcpp {
     namespace internal {
 
-        inline SEXP convert_using_rfunction(SEXP x, const char* const fun) { 	// #nocov start
+        inline SEXP get_namespace(const char* ns) {
+            SEXP getNamespaceSym = Rf_install("getNamespace");
+            Shield<SEXP> ns_str(Rf_mkString(ns));
+            Shield<SEXP> ns_call(Rf_lang2(getNamespaceSym, ns_str));
+            return Rcpp_fast_eval(ns_call, R_BaseEnv);
+        }
+
+        inline SEXP convert_using_rfunction(SEXP x, const char* const fun,
+                                            const char* ns = NULL) {   // #nocov start
             Armor<SEXP> res;
+            SEXP env = ns ? get_namespace(ns) : R_BaseEnv;
             try{
                 SEXP funSym = Rf_install(fun);
-                res = Rcpp_fast_eval(Rf_lang2(funSym, x), R_BaseEnv);
+                res = Rcpp_fast_eval(Rf_lang2(funSym, x), env);
             } catch( eval_error& e) {
                 const char* fmt = "Could not convert using R function: %s.";
                 throw not_compatible(fmt, fun);
