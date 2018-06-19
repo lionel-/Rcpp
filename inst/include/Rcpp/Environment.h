@@ -374,7 +374,8 @@ namespace Rcpp{
             try{
                 SEXP getNamespaceSym = Rf_install("getNamespace");
                 Shield<SEXP> package_str( Rf_mkString(package.c_str()) );
-                env = Rcpp_fast_eval(Rf_lang2(getNamespaceSym, package_str), R_BaseEnv);
+                Shield<SEXP> ns_call(Rf_lang2(getNamespaceSym, package_str));
+                env = Rcpp_fast_eval(ns_call, R_BaseEnv);
             } catch( ... ){
                 throw no_such_namespace( package  ) ;
             }
