@@ -1,4 +1,9 @@
 
+2018-06-22  Lionel Henry  <lionel@rstudio.com>
+
+        * inst/include/Rcpp/api/meat/Rcpp_eval.h: Extract newTryCatchCall()
+        from Rcpp_eval().
+
 2018-06-21  Lionel Henry  <lionel@rstudio.com>
 
         * inst/include/Rcpp/api/meat/unwind.h: Extract unwind protection from
