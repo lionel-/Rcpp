@@ -99,6 +99,7 @@ __OUT__ RCPP_DECORATE(__NAME__)(___0, ___1, ___2, ___3)
 SEXP get_Rcpp_protection_stack();
 
 CALLFUN_1(as_character_externalptr);
+CALLFUN_1(call_back_externalptr);
 
 CALLFUN_1(Class__name);
 CALLFUN_1(Class__has_default_constructor);

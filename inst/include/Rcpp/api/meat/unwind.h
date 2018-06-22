@@ -20,12 +20,31 @@
 #ifndef RCPP_API_MEAT_UNWIND_H
 #define RCPP_API_MEAT_UNWIND_H
 
+
+// This should always be defined for src/api.cpp
+namespace Rcpp { namespace internal {
+
+typedef SEXP (*tryCatchCallback)(void*);
+
+struct TryCatchData {
+    tryCatchCallback callback;
+    void* data;
+    TryCatchData(tryCatchCallback callback_, void* data_) :
+        callback(callback_),
+        data(data_)
+    { }
+};
+
+}} // namespace Rcpp::internal
+
+
+#ifdef RCPP_USE_PROTECT_UNWIND
+
 #include <csetjmp>
 
 #ifdef RCPP_USING_CXX11
 #include <functional>
 #endif
-
 
 namespace Rcpp { namespace internal {
 
@@ -81,5 +100,45 @@ inline SEXP unwindProtect(std::function<SEXP(void)> callback) {
 #endif
 
 } // namespace Rcpp
+
+
+namespace Rcpp { namespace internal {
+
+// Defined in Rcpp_eval.h
+SEXP newTryCatchCall(SEXP, SEXP, bool);
+
+inline SEXP newTryCatchCallbackCall(XPtr<TryCatchData> ptr) {
+    Shield<SEXP> expr(Rf_lang2(Rf_install("call_back_externalptr"), ptr));
+    SEXP env = Rcpp::internal::get_Rcpp_namespace();
+    return newTryCatchCall(expr, env, false);
+}
+
+}} // namespace Rcpp::internal
+
+
+namespace Rcpp {
+
+inline SEXP tryCatch(SEXP (*callback)(void*), void* data, bool* caught) {
+    try {
+        internal::TryCatchData tryCatchData(callback, data);
+        XPtr<internal::TryCatchData> ptr(&tryCatchData);
+
+        Shield<SEXP> call(internal::newTryCatchCallbackCall(ptr));
+        SEXP out = Rcpp_fast_eval(call, R_BaseEnv);
+
+        if (caught)
+            *caught = false;
+        return out;
+    }
+    catch (...) {
+        if (caught)
+            *caught = true;
+        return R_NilValue;
+    }
+}
+
+} // namespace Rcpp
+
+#endif // RCPP_USE_PROTECT_UNWIND
 
 #endif

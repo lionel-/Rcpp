@@ -23,8 +23,9 @@
 
 #if (defined(RCPP_PROTECTED_EVAL) && defined(R_VERSION) && R_VERSION >= R_Version(3, 5, 0))
 #define RCPP_USE_PROTECT_UNWIND
-#include <Rcpp/api/meat/unwind.h>
 #endif
+
+#include <Rcpp/api/meat/unwind.h>
 
 
 namespace Rcpp { namespace internal {

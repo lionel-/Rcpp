@@ -173,6 +173,14 @@ SEXP as_character_externalptr(SEXP xp) {		// #nocov start
 }							// #nocov end
 
 // [[Rcpp::internal]]
+SEXP call_back_externalptr(SEXP ptr) {        // #nocov start
+    BEGIN_RCPP
+    Rcpp::XPtr<Rcpp::internal::TryCatchData> xptr = (Rcpp::XPtr<Rcpp::internal::TryCatchData>) ptr;
+    return xptr->callback(xptr->data);
+    END_RCPP
+}                           // #nocov end
+
+// [[Rcpp::internal]]
 SEXP rcpp_capabilities() {
     Shield<SEXP> cap(Rf_allocVector(LGLSXP, 13));
     Shield<SEXP> names(Rf_allocVector(STRSXP, 13));
@@ -324,4 +332,3 @@ SEXP stack_trace(const char* file, int line) {
 // }
 
 // }}}
-
