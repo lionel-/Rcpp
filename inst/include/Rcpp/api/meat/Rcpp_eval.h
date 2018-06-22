@@ -56,7 +56,7 @@ inline SEXP Rcpp_eval_impl(SEXP expr, SEXP env) {
 
 #endif
 
-inline SEXP newTryCatchCall(SEXP expr, SEXP env) {
+inline SEXP newTryCatchCall(SEXP expr, SEXP env, bool interrupts = true) {
     // 'identity' function used to capture errors, interrupts
     SEXP identity = Rf_findFun(::Rf_install("identity"), R_BaseNamespace);
 
@@ -64,13 +64,22 @@ inline SEXP newTryCatchCall(SEXP expr, SEXP env) {
         stop("Failed to find 'base::identity()'");
     }
 
-    // define the evalq call -- the actual R evaluation we want to execute
+    // Define the evalq call -- the actual R evaluation we want to execute
     Shield<SEXP> evalqCall(Rf_lang3(::Rf_install("evalq"), expr, env));
 
-    // define the call -- enclose with `tryCatch` so we can record and forward error messages
-    Shield<SEXP> call(Rf_lang4(::Rf_install("tryCatch"), evalqCall, identity, identity));
-    SET_TAG(CDDR(call), ::Rf_install("error"));
-    SET_TAG(CDDR(CDR(call)), ::Rf_install("interrupt"));
+    // Define the call -- enclose with `tryCatch` so we can record and forward error messages
+    Shield<SEXP> call(Rf_lang3(::Rf_install("tryCatch"), evalqCall, identity));
+
+    // Set argument name for the error handler
+    SEXP elt = CDDR(call);
+    SET_TAG(elt, ::Rf_install("error"));
+
+    // Push interrupt handler at the tail of arguments if requested
+    if (interrupts) {
+        Shield<SEXP> interruptNode(Rf_cons(identity, R_NilValue));
+        SET_TAG(interruptNode, ::Rf_install("interrupt"));
+        SETCDR(elt, interruptNode);
+    }
 
     return call;
 }
