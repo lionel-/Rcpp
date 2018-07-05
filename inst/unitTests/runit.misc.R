@@ -214,4 +214,8 @@ if (.runThisTest) {
         checkTrue(nchar(Rcpp:::bib()) > 0, msg="bib file")
     }
 
+    test.parseEval <- function() {
+        checkEquals(testParseEval("toupper(letters)", globalenv()), LETTERS)
+        checkIdentical(testParseEval("environment(function() {})", baseenv()), baseenv())
+    }
 }

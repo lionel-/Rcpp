@@ -224,3 +224,8 @@ String testNullableString(Rcpp::Nullable<Rcpp::String> param = R_NilValue) {
   else
     return String("");
 }
+
+// [[Rcpp::export]]
+SEXP testParseEval(String string, SEXP env) {
+    return Rcpp::internal::parseEval(string.get_cstring(), env);
+}

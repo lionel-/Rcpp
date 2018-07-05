@@ -71,8 +71,14 @@ SEXP testUnwindProtect(LogicalVector indicator, bool fail) {
     return out;
 }
 
+// [[Rcpp::export]]
+SEXP testParseEval(LogicalVector indicator, String string, SEXP env) {
+    unwindIndicator my_data(indicator);
+    return Rcpp::internal::parseEval(string.get_cstring(), env);
+}
 
-// [[Rcpp::plugins("cpp11")]]
+
+// [[Rcpp::plugins(cpp11)]]
 
 // [[Rcpp::export]]
 SEXP testUnwindProtectLambda(LogicalVector indicator, bool fail) {

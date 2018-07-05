@@ -23,6 +23,15 @@
 
         * inst/unitTests/cpp/stack.cpp: Use new plugin to enable unwind-protect.
 
+2018-07-05  Lionel Henry  <lionel@rstudio.com>
+
+        * inst/include/Rcpp/parseEval.h: New internal::parseEval() function that
+        wraps R 3.4's R_ParseEvalString(). This is especially useful to create R
+        objects like language call with R code. This wrapper uses unwind-protect
+        when available but falls back to raw evaluation otherwise. It should
+        only be used for evaluating code that is known to not jump or fail,
+        barring exceptional circumstances like failure to allocate memory.
+
 2018-06-22  Kevin Ushey  <kevinushey@gmail.com>
 
         * inst/include/Rcpp/api/meat/Rcpp_eval.h: Ensure R_BaseEnv is used

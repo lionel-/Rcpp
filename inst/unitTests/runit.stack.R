@@ -169,4 +169,12 @@ if (.runThisTest) {
             checkTrue(unwound)
         }
     }
+
+    test.unwindParseEval <- function() {
+        if (hasUnwind) {
+            unwound <- FALSE
+            checkException(testParseEval(unwound, "stop(\"parseEval()\")", globalenv()))
+            checkTrue(unwound)
+        }
+    }
 }
