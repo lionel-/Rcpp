@@ -81,16 +81,6 @@ namespace Rcpp {
         SEXP Rcpp_eval_impl(SEXP expr, SEXP env = R_GlobalEnv);
     }
 
-#ifdef RCPP_PROTECTED_EVAL
-
-SEXP unwindProtect(SEXP (*callback)(void* data), void* data);
-
-  #ifdef RCPP_USING_CXX11
-SEXP unwindProtect(std::function<SEXP(void)> callback);
-  #endif
-
-#endif
-
     class Module;
 
     namespace traits {
@@ -132,20 +122,22 @@ SEXP unwindProtect(std::function<SEXP(void)> callback);
 
 }
 
-#include <Rcpp/parse.h>
 #include <Rcpp/storage/storage.h>
 #include <Rcpp/protection/protection.h>
 #include <Rcpp/routines.h>
 #include <Rcpp/exceptions.h>
 #include <Rcpp/proxy/proxy.h>
 
+#ifdef RCPP_USING_UNWIND_PROTECT
+    #include <Rcpp/unwindProtect.h>
+#endif
+#include <Rcpp/parse.h>
+
 #include <Rcpp/lang.h>
 #include <Rcpp/complex.h>
 #include <Rcpp/barrier.h>
 
 #define RcppExport extern "C" attribute_visible
-
-#include <Rcpp/exceptions.h>
 
 #include <Rcpp/Interrupt.h>
 
