@@ -224,55 +224,43 @@ namespace Rcpp {
     #undef RCPP_EXCEPTION_CLASS
     #undef RCPP_ADVANCED_EXCEPTION_CLASS
 
-
-namespace internal {
-
-    inline SEXP nth(SEXP s, int n) {				// #nocov start
-        return Rf_length(s) > n ? (n == 0 ? CAR(s) : CAR(Rf_nthcdr(s, n))) : R_NilValue;
-    }
-
-    // We want the call just prior to the call from Rcpp_eval
-    // This conditional matches
-    // tryCatch(evalq(sys.calls(), .GlobalEnv), error = identity, interrupt = identity)
-    inline bool is_Rcpp_eval_call(SEXP expr) {
-        SEXP sys_calls_symbol = Rf_install("sys.calls");
-        SEXP identity_symbol = Rf_install("identity");
-        SEXP identity_fun = Rf_findFun(identity_symbol, R_BaseEnv);
-        SEXP tryCatch_symbol = Rf_install("tryCatch");
-        SEXP evalq_symbol = Rf_install("evalq");
-
-        return TYPEOF(expr) == LANGSXP &&
-            Rf_length(expr) == 4 &&
-            nth(expr, 0) == tryCatch_symbol &&
-            CAR(nth(expr, 1)) == evalq_symbol &&
-            CAR(nth(nth(expr, 1), 1)) == sys_calls_symbol &&
-            nth(nth(expr, 1), 2) == R_GlobalEnv &&
-            nth(expr, 2) == identity_fun &&
-            nth(expr, 3) == identity_fun;
-    }
-} // namespace internal
-
 } // namespace Rcpp
 
-inline SEXP get_last_call(){
-    SEXP sys_calls_symbol = Rf_install("sys.calls");
 
-    Rcpp::Shield<SEXP> sys_calls_expr(Rf_lang1(sys_calls_symbol));
-    Rcpp::Shield<SEXP> calls(Rcpp_fast_eval(sys_calls_expr, R_GlobalEnv));
+namespace Rcpp { namespace internal {
 
-    SEXP cur, prev;
-    prev = cur = calls;
-    while(CDR(cur) != R_NilValue) {
-        SEXP expr = CAR(cur);
+// From parse.h
+SEXP parse(const char* str);
 
-        if (Rcpp::internal::is_Rcpp_eval_call(expr)) {
-            break;
-        }
-        prev = cur;
-        cur = CDR(cur);
+namespace {
+
+// Could use a static Rcpp::RObject instead if it is was already defined
+struct currentCallImpl {
+    currentCallImpl() {
+        // Must be evaluated within base::eval() to get correct answers and
+        // substract the two evalq() frames
+        currentCall = parse("evalq(sys.call(sys.nframe() - 2L))");
+        R_PreserveObject(currentCall);
     }
-    return CAR(prev);
+    ~currentCallImpl() {
+        R_ReleaseObject(currentCall);
+    }
+
+    SEXP operator() () {
+        return Rcpp_eval_impl(currentCall, R_BaseEnv);
+    }
+
+    SEXP currentCall;
+};
+
+inline SEXP currentCall() {
+    // Initialised once per session
+    static currentCallImpl impl;
+    return impl();
 }
+
+}}} // static namespace Rcpp::internal
+
 
 inline SEXP get_exception_classes( const std::string& ex_class) {
     Rcpp::Shield<SEXP> res( Rf_allocVector( STRSXP, 4 ) );
@@ -317,7 +305,7 @@ inline SEXP exception_to_condition_template( const Exception& ex, bool include_c
   Rcpp::Shelter<SEXP> shelter;
   SEXP call, cppstack;
   if (include_call) {
-      call = shelter(get_last_call());
+      call = shelter(Rcpp::internal::currentCall());
       cppstack = shelter(rcpp_get_stack_trace());
   } else {
       call = R_NilValue;
