@@ -119,8 +119,27 @@ namespace Rcpp {
         }
         return y;
     }
+} // namespace Rcpp
 
-}
+
+namespace Rcpp { namespace internal {
+
+// Simple version of RObject for early use
+struct BareRObject {
+    BareRObject(SEXP x) : obj(x) {
+        R_PreserveObject(obj);
+    }
+    ~BareRObject() {
+        R_ReleaseObject(obj);
+    }
+
+    operator SEXP () const { return obj; }
+
+    SEXP obj;
+};
+
+}} // namespace Rcpp::internal
+
 
 #include <Rcpp/storage/storage.h>
 #include <Rcpp/protection/protection.h>

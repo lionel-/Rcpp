@@ -234,29 +234,11 @@ SEXP parse(const char* str);
 
 namespace {
 
-// Could use a static Rcpp::RObject instead if it is was already defined
-struct currentCallImpl {
-    currentCallImpl() {
-        // Must be evaluated within base::eval() to get correct answers and
-        // substract the two evalq() frames
-        currentCall = parse("evalq(sys.call(sys.nframe() - 2L))");
-        R_PreserveObject(currentCall);
-    }
-    ~currentCallImpl() {
-        R_ReleaseObject(currentCall);
-    }
-
-    SEXP operator() () {
-        return Rcpp_eval_impl(currentCall, R_BaseEnv);
-    }
-
-    SEXP currentCall;
-};
-
 inline SEXP currentCall() {
-    // Initialised once per session
-    static currentCallImpl impl;
-    return impl();
+    // Must be evaluated within base::eval() to get correct answers and
+    // substract the two evalq() frames
+    static BareRObject call = parse("evalq(sys.call(sys.nframe() - 2L))");
+    return Rcpp_eval_impl(call, R_BaseEnv);
 }
 
 }}} // static namespace Rcpp::internal
