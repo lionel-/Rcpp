@@ -31,10 +31,17 @@ inline SEXP parseImpl(const char *str) {
 
     ParseStatus status;
     SEXP exprs = shelter(R_ParseVector(code, -1, &status, R_NilValue));
-    if (status != PARSE_OK || TYPEOF(exprs) != EXPRSXP || LENGTH(exprs) != 1)
-        stop("Internal error while parsing Rcpp code");
+    if (status != PARSE_OK)
+        stop("Internal error while parsing Rcpp code. Status: %d", status);
+    if (TYPEOF(exprs) != EXPRSXP)
+        stop("Internal error while parsing Rcpp code. Type: %d", TYPEOF(exprs));
 
-    return VECTOR_ELT(exprs, 0);
+    if (LENGTH(exprs) == 1) {
+        return VECTOR_ELT(exprs, 0);
+    } else {
+        exprs = shelter(Rf_coerceVector(exprs, LISTSXP));
+        return Rf_lcons(Rf_install("{"), exprs);
+    }
 }
 
 inline SEXP parseEvalImpl(const char *str, SEXP env) {
