@@ -71,42 +71,70 @@ inline SEXP Rcpp_fast_eval(SEXP expr, SEXP env) {
 
 #endif
 
+} // namespace Rcpp
+
+
+namespace Rcpp { namespace internal { namespace {
+
+const char* tryEvalExprSource =
+    "tryCatch(eval(expr, env), error = handler, interrupt = handler)";
+
+// Generate and return a child of the base env which will act like a closure
+// environment for `tryEvalExpr` calls
+const char* tryEvalEnvSource =
+    " env <- new.env(parent = baseenv())                             \n"
+    "                                                                \n"
+    " evalq(envir = env, {                                           \n"
+    "     expr <- NULL                                               \n"
+    "     env <- NULL                                                \n"
+    "                                                                \n"
+    "     handler <- function(cnd) {                                 \n"
+    "         structure(list(cnd), class = 'Rcpp:::caughtCondition') \n"
+    "     }                                                          \n"
+    "                                                                \n"
+    "     environment()                                              \n"
+    " })";
+
+SEXP tryEval(SEXP expr, SEXP env) {
+    static RObject tryEvalExpr = internal::parse(tryEvalExprSource);
+    static Environment tryEvalEnv = internal::parseEval(tryEvalEnvSource, R_BaseEnv);
+
+    tryEvalEnv["expr"] = expr;
+    tryEvalEnv["env"] = env;
+
+    Shield<SEXP> out(internal::Rcpp_eval_impl(tryEvalExpr, tryEvalEnv));
+
+    // Free up `expr` and `env` for gc collection
+    tryEvalEnv["expr"] = R_NilValue;
+    tryEvalEnv["env"] = R_NilValue;
+
+    return out;
+}
+
+}}} // static namespace Rcpp::internal
+
+
+namespace Rcpp {
 
 inline SEXP Rcpp_eval(SEXP expr, SEXP env) {
+    Rcpp::Shelter<SEXP> shelter;
+    SEXP res = shelter(internal::tryEval(expr, env));
 
-    // 'identity' function used to capture errors, interrupts
-    SEXP identity = Rf_findFun(::Rf_install("identity"), R_BaseNamespace);
+    // Check for condition results (errors, interrupts)
+    if (Rf_inherits(res, "Rcpp:::caughtCondition")) {
+        if (TYPEOF(res) != VECSXP && Rf_length(res) != 1)
+            stop("Internal error: Corrupt condition sentinel");
 
-    if (identity == R_UnboundValue) {
-        stop("Failed to find 'base::identity()'");
-    }
-
-    // define the evalq call -- the actual R evaluation we want to execute
-    Shield<SEXP> evalqCall(Rf_lang3(::Rf_install("evalq"), expr, env));
-
-    // define the call -- enclose with `tryCatch` so we can record and forward error messages
-    Shield<SEXP> call(Rf_lang4(::Rf_install("tryCatch"), evalqCall, identity, identity));
-    SET_TAG(CDDR(call), ::Rf_install("error"));
-    SET_TAG(CDDR(CDR(call)), ::Rf_install("interrupt"));
-
-    Shield<SEXP> res(internal::Rcpp_eval_impl(call, R_BaseEnv));
-
-    // check for condition results (errors, interrupts)
-    if (Rf_inherits(res, "condition")) {
-
-        if (Rf_inherits(res, "error")) {
-
-            Shield<SEXP> conditionMessageCall(::Rf_lang2(::Rf_install("conditionMessage"), res));
-
-            Shield<SEXP> conditionMessage(internal::Rcpp_eval_impl(conditionMessageCall, R_BaseEnv));
+        SEXP cnd = VECTOR_ELT(res, 0);
+        if (Rf_inherits(cnd, "error")) {
+            SEXP conditionMessageCall = shelter(::Rf_lang2(::Rf_install("conditionMessage"), cnd));
+            SEXP conditionMessage = shelter(internal::Rcpp_eval_impl(conditionMessageCall, R_BaseEnv));
             throw eval_error(CHAR(STRING_ELT(conditionMessage, 0)));
-        }
-
-        // check for interrupt
-        if (Rf_inherits(res, "interrupt")) {
+        } else if (Rf_inherits(cnd, "interrupt")) {
             throw internal::InterruptedException();
+        } else {
+            stop("Internal error: Unexpected condition class");
         }
-
     }
 
     return res;

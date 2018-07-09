@@ -100,13 +100,9 @@ if (.runThisTest) {
         )
         checkTrue(unwound)
 
-        # The old mechanism cannot differentiate between a returned error and a
-        # thrown error
-        if (hasUnwind) {
-            checkIdentical(out, cnd)
-        } else {
-            checkIdentical(out, "abort")
-        }
+        # Originally the old mechanism did not differentiate between returned
+        # and thrown conditions. This is now fixed:
+        checkIdentical(out, cnd)
     }
 
     # Longjump from the inner protected eval
