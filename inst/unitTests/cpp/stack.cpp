@@ -43,7 +43,7 @@ struct unwindIndicator {
 // [[Rcpp::export]]
 SEXP testFastEval(RObject expr, Environment env, Environment indicator) {
     unwindIndicator my_data(indicator);
-    return Rcpp::Rcpp_fast_eval(expr, env);
+    return Rcpp::evalProtect(expr, env);
 }
 
 // [[Rcpp::export]]

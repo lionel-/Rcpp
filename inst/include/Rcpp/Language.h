@@ -134,14 +134,14 @@ namespace Rcpp{
          * eval this call in the global environment
          */
         SEXP eval() const {
-            return Rcpp_fast_eval( Storage::get__(), R_GlobalEnv ) ;
+            return evalProtect(Storage::get__(), R_GlobalEnv);
         }
 
         /**
          * eval this call in the requested environment
          */
         SEXP eval(SEXP env) const {
-            return Rcpp_fast_eval( Storage::get__(), env ) ;
+            return evalProtect(Storage::get__(), env);
         }
 
         SEXP fast_eval() const {

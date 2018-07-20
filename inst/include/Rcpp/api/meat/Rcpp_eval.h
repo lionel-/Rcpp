@@ -39,7 +39,7 @@ inline SEXP Rcpp_protected_eval(void* eval_data) {
 
 // This is used internally instead of Rf_eval() to make evaluation safer
 inline SEXP Rcpp_eval_impl(SEXP expr, SEXP env) {
-    return Rcpp_fast_eval(expr, env);
+    return evalProtect(expr, env);
 }
 
 #else // R < 3.5.0
@@ -58,14 +58,14 @@ namespace Rcpp {
 
 #ifdef RCPP_USING_UNWIND_PROTECT
 
-inline SEXP Rcpp_fast_eval(SEXP expr, SEXP env) {
+inline SEXP evalProtect(SEXP expr, SEXP env) {
     internal::EvalData data(expr, env);
     return unwindProtect(&internal::Rcpp_protected_eval, &data);
 }
 
 #else
 
-inline SEXP Rcpp_fast_eval(SEXP expr, SEXP env) {
+inline SEXP evalProtect(SEXP expr, SEXP env) {
     return Rcpp_eval(expr, env);
 }
 

@@ -1126,11 +1126,11 @@ public:
 public:
 
     inline SEXP eval() const {
-        return Rcpp_fast_eval( Storage::get__(), R_GlobalEnv ) ;
+        return evalProtect(Storage::get__(), R_GlobalEnv) ;
     }
 
     inline SEXP eval(SEXP env) const {
-        return Rcpp_fast_eval( Storage::get__(), env );
+        return evalProtect(Storage::get__(), env);
     }
 
 
